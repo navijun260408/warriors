@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>MP3 プレイヤー</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: url('background.png') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+      height: 100vh;
+    }
+    .player {
+      position: absolute;
+    }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #ffeb3b; /* 黄色 */
+      color: blue; /* 青文字 */
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button.playing {
+      background-color: #ff9800; /* 再生中：オレンジ */
+    }
+    button.queued {
+      background-color: #9c27b0; /* 予約済み：パープル */
+    }
+    button:hover {
+      filter: brightness(0.9);
+    }
+    #stopButton {
+      background-color: #ffeb3b; /* 黄色 */
+    }
+    #stopButton.active {
+      background-color: #b71c1c !important;
+    }
+    /* ボタンの位置を指定 */
+    #button1 { top: 100px; left: 50px; }
+    #button2 { top: 100px; left: 200px; }
+    #button3 { top: 100px; left: 350px; }
+    #button4 { top: 200px; left: 50px; }
+    #button5 { top: 200px; left: 200px; }
+    #button6 { top: 200px; left: 350px; }
+    #button7 { top: 300px; left: 50px; }
+    #button8 { top: 300px; left: 200px; }
+    #stopButton { top: 300px; left: 350px; }
+  </style>
+</head>
+<body>
+  <div id="players">
+    <div class="player" id="button1"><button>1st down</button></div>
+    <div class="player" id="button2"><button>2nd down</button></div>
+    <div class="player" id="button3"><button>3rd down</button></div>
+    <div class="player" id="button4"><button>pant</button></div>
+    <div class="player" id="button5"><button>kickoff</button></div>
+    <div class="player" id="button6"><button>tequila</button></div>
+    <div class="player" id="button7"><button>fineplay</button></div>
+    <div class="player" id="button8"><button>touchdown</button></div>
+  </div>
+  <button id="stopButton">STOP</button>
+
+  <script>
+    const mp3Files = [
+      "1st.mp3",
+      "2nd.mp3",
+      "3rd.mp3",
+      "pant.mp3",
+      "kickoff.mp3",
+      "fineplay.mp3",
+      "touchdown.mp3",
+      "tequila.mp3"
+    ];
+
+    const stopButton = document.getElementById("stopButton");
+
+    let currentAudio = null;
+    let currentButton = null;
+    let queuedTrack = null; // { audio, button, file }
+
+    mp3Files.forEach((file, index) => {
+      const button = document.querySelector(`#button${index + 1} button`);
+      const audio = new Audio(file);
+
+      button.addEventListener("click", () => {
+        const isSpecial = (file === "fineplay.mp3" || file === "touchdown.mp3");
+
+        // 再生中の曲がある場合
+        if (isSpecial && currentAudio && currentAudio !== audio && !currentAudio.ended && !currentAudio.paused) {
+          // 同じトラックが予約されていたらキャンセル
+          if (queuedTrack && queuedTrack.file === file) {
+            button.classList.remove("queued");
+            queuedTrack = null;
+            return;
+          }
+
+          // 他のトラックが予約されていたら無視
+          if (queuedTrack) {
+            return;
+          }
+
+          // 予約処理
+          queuedTrack = { audio, button, file };
+          button.classList.add("queued");
+          return;
+        }
+
+        // 通常再生（再生中なし、または特別トラック以外）
+        if (!currentAudio || currentAudio.paused || currentAudio.ended) {
+          if (currentButton) currentButton.classList.remove("playing");
+
+          button.classList.add("playing");
+          audio.play();
+
+          currentAudio = audio;
+          currentButton = button;
+        }
+      });
+
+      audio.addEventListener("ended", () => {
+        if (currentButton) currentButton.classList.remove("playing");
+
+        // 次の予約があれば再生
+        if (queuedTrack) {
+          const { audio: nextAudio, button: nextButton } = queuedTrack;
+          nextButton.classList.remove("queued");
+          nextButton.classList.add("playing");
+
+          nextAudio.play();
+          currentAudio = nextAudio;
+          currentButton = nextButton;
+
+          queuedTrack = null;
+        } else {
+          currentAudio = null;
+          currentButton = null;
+        }
+      });
+    });
+
+    stopButton.addEventListener("click", () => {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        if (currentButton) currentButton.classList.remove("playing");
+        currentAudio = null;
+        currentButton = null;
+      }
+
+      if (queuedTrack && queuedTrack.button) {
+        queuedTrack.button.classList.remove("queued");
+      }
+      queuedTrack = null;
+
+      stopButton.classList.add("active");
+      setTimeout(() => {
+        stopButton.classList.remove("active");
+      }, 2000);
+    });
+  </script>
+</body>
+</html>
