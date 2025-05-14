@@ -1,7 +1,7 @@
 const CACHE_NAME = 'mp3-player-cache-v1';
 const FILES_TO_CACHE = [
   './',
-  './warriors.html',
+  './index.html',
   './manifest.json',
   './1st.mp3',
   './2nd.mp3',
@@ -12,7 +12,6 @@ const FILES_TO_CACHE = [
   './pant.mp3',
   './tequila.mp3',
   './icon.png'
-  // 他のMP3や画像も追加
 ];
 
 self.addEventListener('install', event => {
