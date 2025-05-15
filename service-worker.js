@@ -6,6 +6,7 @@ const FILES_TO_CACHE = [
   `/warriors/${yearFolder}/`,
   `/warriors/index.html`,
   `/warriors/manifest.json`,
+  `/warriors/${yearFolder}/startTimes.json`,
   `/warriors/${yearFolder}/1st.mp3`,
   `/warriors/${yearFolder}/2nd.mp3`,
   `/warriors/${yearFolder}/3rd.mp3`,
