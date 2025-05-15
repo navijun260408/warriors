@@ -2,12 +2,11 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="manifest" href="/warriors/manifest.json" />
   <link rel="apple-touch-icon" href="/warriors/icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
   <title>MP3 Player</title>
   <style>
     body {
@@ -77,6 +76,11 @@
   </style>
 </head>
 <body>
+
+  <script>
+    const yearFolder = "2024";  // Change this to switch year folder
+  </script>
+
   <div class="container">
     <div class="row btn-row">
       <button class="btn-two" data-file="1st.mp3">1st down</button>
@@ -105,119 +109,120 @@
     const stopButton = document.getElementById("stopButton");
     const buttons = document.querySelectorAll("button[data-file]");
 
-    // Object to hold start times (in seconds) for each track, all set to 0 for now
-    const startTimes = {
-      "1st.mp3": 0,
-      "2nd.mp3": 1.5,
-      "3rd.mp3": 0,
-      "tequila.mp3": 0,
-      "kickoff.mp3": 0,
-      "pant.mp3": 41.8,
-      "touchdown.mp3": 3.5,
-      "fineplay.mp3": 1.5
-    };
+    let startTimes = {}; // will hold start time data loaded from JSON
 
-    let currentAudio = null;
-    let currentButton = null;
-    let queuedTrack = null;
+    // Function to build full path for audio files using yearFolder
+    const filePath = (file) => `${yearFolder}/${file}`;
 
-    buttons.forEach(button => {
-      const file = button.dataset.file;
-      const audio = new Audio(file);
-
-      button.addEventListener("click", () => {
-        const isSpecial = (file === "fineplay.mp3" || file === "touchdown.mp3");
-
-        // Handle queue logic for special tracks
-        if (isSpecial && currentAudio && currentAudio !== audio && !currentAudio.ended && !currentAudio.paused) {
-          if (queuedTrack && queuedTrack.file === file) {
-            button.classList.remove("queued");
-            queuedTrack = null;
-            return;
-          }
-          if (queuedTrack) return;
-
-          queuedTrack = { audio, button, file };
-          button.classList.add("queued");
-          return;
-        }
-
-        // Play the audio if none is currently playing
-        if (!currentAudio || currentAudio.paused || currentAudio.ended) {
-          if (currentButton) currentButton.classList.remove("playing");
-
-          // Get the start time for this track
-          const startTime = startTimes[file] || 0;
-
-          // Reset and pause audio before setting currentTime
-          audio.currentTime = 0;
-          audio.pause();
-
-          // Wait until metadata is loaded before setting currentTime and playing
-          audio.onloadedmetadata = () => {
-            audio.currentTime = startTime;
-            audio.play();
-          };
-
-          // Reload the audio to trigger loadedmetadata event
-          audio.load();
-
-          button.classList.add("playing");
-
-          currentAudio = audio;
-          currentButton = button;
-        }
+    // Fetch startTimes JSON file dynamically from yearFolder
+    fetch(`${yearFolder}/startTimes.json`)
+      .then(response => {
+        if (!response.ok) throw new Error("Failed to load startTimes.json");
+        return response.json();
+      })
+      .then(json => {
+        startTimes = json;
+        setupPlayer();
+      })
+      .catch(error => {
+        console.error("Error loading startTimes.json:", error);
+        alert("Failed to load start time configuration.");
       });
 
-      // When audio ends, check if there is a queued track to play next
-      audio.addEventListener("ended", () => {
-        if (currentButton) currentButton.classList.remove("playing");
+    function setupPlayer() {
+      let currentAudio = null;
+      let currentButton = null;
+      let queuedTrack = null;
 
-        if (queuedTrack) {
-          const { audio: nextAudio, button: nextButton, file: nextFile } = queuedTrack;
-          queuedTrack.button.classList.remove("queued");
-          nextButton.classList.add("playing");
+      buttons.forEach(button => {
+        const file = button.dataset.file;
+        const audio = new Audio(filePath(file));
 
-          // Set start time and play the next queued track
-          const startTime = startTimes[nextFile] || 0;
-          nextAudio.currentTime = 0;
-          nextAudio.pause();
-          nextAudio.onloadedmetadata = () => {
-            nextAudio.currentTime = startTime;
-            nextAudio.play();
-          };
-          nextAudio.load();
+        button.addEventListener("click", () => {
+          const isSpecial = (file === "fineplay.mp3" || file === "touchdown.mp3");
 
-          currentAudio = nextAudio;
-          currentButton = nextButton;
+          if (isSpecial && currentAudio && currentAudio !== audio && !currentAudio.ended && !currentAudio.paused) {
+            if (queuedTrack && queuedTrack.file === file) {
+              button.classList.remove("queued");
+              queuedTrack = null;
+              return;
+            }
+            if (queuedTrack) return;
 
-          queuedTrack = null;
-        } else {
+            queuedTrack = { audio, button, file };
+            button.classList.add("queued");
+            return;
+          }
+
+          if (!currentAudio || currentAudio.paused || currentAudio.ended) {
+            if (currentButton) currentButton.classList.remove("playing");
+
+            const startTime = startTimes[file] || 0;
+
+            audio.currentTime = 0;
+            audio.pause();
+
+            audio.onloadedmetadata = () => {
+              audio.currentTime = startTime;
+              audio.play();
+            };
+            audio.load();
+
+            button.classList.add("playing");
+
+            currentAudio = audio;
+            currentButton = button;
+          }
+        });
+
+        audio.addEventListener("ended", () => {
+          if (currentButton) currentButton.classList.remove("playing");
+
+          if (queuedTrack) {
+            const { audio: nextAudio, button: nextButton, file: nextFile } = queuedTrack;
+            queuedTrack.button.classList.remove("queued");
+            nextButton.classList.add("playing");
+
+            const startTime = startTimes[nextFile] || 0;
+            nextAudio.currentTime = 0;
+            nextAudio.pause();
+            nextAudio.onloadedmetadata = () => {
+              nextAudio.currentTime = startTime;
+              nextAudio.play();
+            };
+            nextAudio.load();
+
+            currentAudio = nextAudio;
+            currentButton = nextButton;
+
+            queuedTrack = null;
+          } else {
+            currentAudio = null;
+            currentButton = null;
+          }
+        });
+      });
+
+      stopButton.addEventListener("click", () => {
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          if (currentButton) currentButton.classList.remove("playing");
           currentAudio = null;
           currentButton = null;
         }
+        if (queuedTrack && queuedTrack.button) {
+          queuedTrack.button.classList.remove("queued");
+        }
+        queuedTrack = null;
+
+        stopButton.classList.add("active");
+        setTimeout(() => {
+          stopButton.classList.remove("active");
+        }, 2000);
       });
-    });
-
-    // Stop button handler: stop playback and reset states
-    stopButton.addEventListener("click", () => {
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-        if (currentButton) currentButton.classList.remove("playing");
-        currentAudio = null;
-        currentButton = null;
-      }
-      if (queuedTrack && queuedTrack.button) {
-        queuedTrack.button.classList.remove("queued");
-      }
-      queuedTrack = null;
-
-      stopButton.classList.add("active");
-      setTimeout(() => {
-        stopButton.classList.remove("active");
-      }, 2000);
-    });
+    }
   </script>
+
 </body>
 </html>

@@ -1,18 +1,22 @@
-const CACHE_NAME = 'mp3-player-cache-v1';
+const CACHE_NAME = 'warriors-cache';
+
+const yearFolder = '2024';  // change the year
+
 const FILES_TO_CACHE = [
-  '/warriors/',
-  '/warriors/index.html',
-  '/warriors/manifest.json',
-  '/warriors/1st.mp3',
-  '/warriors/2nd.mp3',
-  '/warriors/3rd.mp3',
-  '/warriors/fineplay.mp3',
-  '/warriors/touchdown.mp3',
-  '/warriors/kickoff.mp3',
-  '/warriors/pant.mp3',
-  '/warriors/tequila.mp3',
-  '/warriors/icon.png'
+  `/warriors/${yearFolder}/`,
+  `/warriors/index.html`,
+  `/warriors/manifest.json`,
+  `/warriors/${yearFolder}/1st.mp3`,
+  `/warriors/${yearFolder}/2nd.mp3`,
+  `/warriors/${yearFolder}/3rd.mp3`,
+  `/warriors/${yearFolder}/fineplay.mp3`,
+  `/warriors/${yearFolder}/touchdown.mp3`,
+  `/warriors/${yearFolder}/kickoff.mp3`,
+  `/warriors/${yearFolder}/pant.mp3`,
+  `/warriors/${yearFolder}/tequila.mp3`,
+  `/warriors/icon.png`
 ];
+
 
 self.addEventListener('install', event => {
   event.waitUntil(
