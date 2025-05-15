@@ -1,17 +1,17 @@
 const CACHE_NAME = 'mp3-player-cache-v1';
 const FILES_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  './1st.mp3',
-  './2nd.mp3',
-  './3rd.mp3',
-  './fineplay.mp3',
-  './touchdown.mp3',
-  './kickoff.mp3',
-  './pant.mp3',
-  './tequila.mp3',
-  './icon.png'
+  '/warriors/',
+  '/warriors/index.html',
+  '/warriors/manifest.json',
+  '/warriors/1st.mp3',
+  '/warriors/2nd.mp3',
+  '/warriors/3rd.mp3',
+  '/warriors/fineplay.mp3',
+  '/warriors/touchdown.mp3',
+  '/warriors/kickoff.mp3',
+  '/warriors/pant.mp3',
+  '/warriors/tequila.mp3',
+  '/warriors/icon.png'
 ];
 
 self.addEventListener('install', event => {
