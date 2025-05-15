@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="/warriors/manifest.json">
-  <link rel="apple-touch-icon" href="/warriors/icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/warriors/manifest.json" />
+  <link rel="apple-touch-icon" href="/warriors/icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <title>MP3 プレイヤー</title>
+  <title>MP3 Player</title>
   <style>
     body {
       font-family: 'Copperplate Gothic', 'Copperplate', serif;
@@ -105,6 +105,18 @@
     const stopButton = document.getElementById("stopButton");
     const buttons = document.querySelectorAll("button[data-file]");
 
+    // Object to hold start times (in seconds) for each track, all set to 0 for now
+    const startTimes = {
+      "1st.mp3": 0,
+      "2nd.mp3": 1.5,
+      "3rd.mp3": 0,
+      "tequila.mp3": 0,
+      "kickoff.mp3": 0,
+      "pant.mp3": 41.8,
+      "touchdown.mp3": 3.5,
+      "fineplay.mp3": 1.5
+    };
+
     let currentAudio = null;
     let currentButton = null;
     let queuedTrack = null;
@@ -116,6 +128,7 @@
       button.addEventListener("click", () => {
         const isSpecial = (file === "fineplay.mp3" || file === "touchdown.mp3");
 
+        // Handle queue logic for special tracks
         if (isSpecial && currentAudio && currentAudio !== audio && !currentAudio.ended && !currentAudio.paused) {
           if (queuedTrack && queuedTrack.file === file) {
             button.classList.remove("queued");
@@ -129,26 +142,52 @@
           return;
         }
 
+        // Play the audio if none is currently playing
         if (!currentAudio || currentAudio.paused || currentAudio.ended) {
           if (currentButton) currentButton.classList.remove("playing");
 
+          // Get the start time for this track
+          const startTime = startTimes[file] || 0;
+
+          // Reset and pause audio before setting currentTime
+          audio.currentTime = 0;
+          audio.pause();
+
+          // Wait until metadata is loaded before setting currentTime and playing
+          audio.onloadedmetadata = () => {
+            audio.currentTime = startTime;
+            audio.play();
+          };
+
+          // Reload the audio to trigger loadedmetadata event
+          audio.load();
+
           button.classList.add("playing");
-          audio.play();
 
           currentAudio = audio;
           currentButton = button;
         }
       });
 
+      // When audio ends, check if there is a queued track to play next
       audio.addEventListener("ended", () => {
         if (currentButton) currentButton.classList.remove("playing");
 
         if (queuedTrack) {
-          const { audio: nextAudio, button: nextButton } = queuedTrack;
-          nextButton.classList.remove("queued");
+          const { audio: nextAudio, button: nextButton, file: nextFile } = queuedTrack;
+          queuedTrack.button.classList.remove("queued");
           nextButton.classList.add("playing");
 
-          nextAudio.play();
+          // Set start time and play the next queued track
+          const startTime = startTimes[nextFile] || 0;
+          nextAudio.currentTime = 0;
+          nextAudio.pause();
+          nextAudio.onloadedmetadata = () => {
+            nextAudio.currentTime = startTime;
+            nextAudio.play();
+          };
+          nextAudio.load();
+
           currentAudio = nextAudio;
           currentButton = nextButton;
 
@@ -160,6 +199,7 @@
       });
     });
 
+    // Stop button handler: stop playback and reset states
     stopButton.addEventListener("click", () => {
       if (currentAudio) {
         currentAudio.pause();
