@@ -5,7 +5,6 @@ const yearFolder = '2024';  // change the year
 ////////////////////////////////////////////////////////////////////////////////
 
 const FILES_TO_CACHE = [
-  `/warriors/${yearFolder}/`,
   `/warriors/index.html`,
   `/warriors/manifest.json`,
   `/warriors/${yearFolder}/startTimes.json`,
