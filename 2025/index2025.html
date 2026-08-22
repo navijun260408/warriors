@@ -79,7 +79,7 @@
 
   <script>
     ///////////////////////////////////////////////////////////////////
-    const yearFolder = "2026";  // Change this to switch year folder
+    const yearFolder = "2025";  // Change this to switch year folder
     ///////////////////////////////////////////////////////////////////
   </script>
 
@@ -90,19 +90,18 @@
     </div>
     <div class="row btn-row">
       <button class="btn-two" data-file="3rd.mp3">3rd down</button>
-      <button class="btn-two" data-file="pant.mp3">ルミナス</button>
+      <button class="btn-two" data-file="timeout.mp3">timeout</button>
     </div>
     <div class="row btn-row">
-      <button class="btn-two" data-file="tequila.mp3">timeout</button>
+      <button class="btn-two" data-file="pant.mp3">ビクトリー</button>
       <button class="btn-two" data-file="phoenix.mp3">不死鳥</button>
     </div>
     <div class="row btn-row">
       <button class="btn-two" data-file="kickoff.mp3">kickoff</button>
-      <button class="btn-two" data-file="fineplay.mp3">fine play</button>
+      <button class="btn-two" data-file="touchdown.mp3">TD</button>
     </div>
     <div class="row btn-row">
-      <button class="btn-two" data-file="touchdown.mp3">TD</button>
-      <button class="btn-two" data-file="tadahitotsu.mp3">ただ一つ</button>
+      <button class="btn-wide" data-file="fineplay.mp3">fineplay</button>
     </div>
     <div class="row btn-row">
       <button class="btn-wide" id="stopButton">stop</button>
@@ -138,16 +137,12 @@
       let currentButton = null;
       let queuedTrack = null;
 
-      // 予約再生（キュー機能）の対象となる曲のリスト
-      const specialFiles = ["tequila.mp3", "pant.mp3", "fineplay.mp3", "tadahitotsu.mp3"];
-
       buttons.forEach(button => {
         const file = button.dataset.file;
         const audio = new Audio(filePath(file));
 
         button.addEventListener("click", () => {
-          // specialFilesに含まれているかどうかで判定
-          const isSpecial = specialFiles.includes(file);
+          const isSpecial = (file === "fineplay.mp3" || file === "touchdown.mp3");
 
           if (isSpecial && currentAudio && currentAudio !== audio && !currentAudio.ended && !currentAudio.paused) {
             if (queuedTrack && queuedTrack.file === file) {
