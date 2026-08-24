@@ -14,7 +14,7 @@ const FILES_TO_CACHE = [
   `/warriors/${yearFolder}/fineplay.mp3`,
   `/warriors/${yearFolder}/touchdown.mp3`,
   `/warriors/${yearFolder}/kickoff.mp3`,
-  `/warriors/${yearFolder}/pant.mp3`,
+  `/warriors/${yearFolder}/pant2.mp3`,
   `/warriors/${yearFolder}/timeout.mp3`,
   `/warriors/icon.png`
 ];
